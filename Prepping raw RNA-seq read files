@@ -1,0 +1,71 @@
+Section 1: Prepping raw RNA-seq read files
+
+1. Import reads to MGHPCC + run FastQC to check quality of reads
+
+rsync -av -e ssh ./reads.ALL.human.fastq kr82a@ghpcc06.umassrc.org:/project/uma_courtney_babbitt/WholeSampleSequences
+bsub -q short -n 20 -W 4:00 -R span[hosts=1] -R rusage[mem=12000] fastqc reads.ALL.human.fastq
+
+Report here: file:///Users/katierickelton/Library/Containers/com.apple.mail/Data/Library/Mail%20Downloads/276F65E7-D5C1-4F53-A8F5-C6455C75944F/fastqc_report.html
+**Everything looks relatively normal for Illumina RNA-seq data
+
+2. Run HTStream Quality Control Package in MGHPCC
+
+bsub -q short -n 20 -W 4:00 -R span[hosts=1] -R rusage[mem=12000] hts_Stats -L human.htstream.stats.log -U reads.ALL.human.fastq
+
+**Again, everything looks normal here.
+
+3. Use HTStream to look for + filter out rRNA sequences
+
+bsub -q interactive -n 15 -W 8:00 -R span[hosts=1] -R rusage[mem=12000] hts_SeqScreener -U reads.ALL.human.fastq -s humanrrnaseq.fasta -r -L human.rrna.log -f human.rna.filtered.fastq
+
+  "Single_end": {
+        "in": 483041094,
+        "out": 483041094,
+        "basepairs_in": 24152054700,
+        "basepairs_out": 24152054700,
+        "hits": 3,134,695
+       
+        
+bsub -q interactive -n 15 -W 8:00 -R span[hosts=1] -R rusage[mem=12000] hts_SuperDeduper -A human.rrna.log -U human.rna.filtered.fastq_SE.fastq -f human.final.QC
+
+**Fairly high number of rRNA sequence in file, and after filtering did see a slight improvement in BUSCO score (from ~20% complete to 40%)
+
+4. Use HTStream to look for duplicate reads 
+
+bsub -q interactive -n 15 -W 8:00 -R span[hosts=1] -R rusage[mem=12000] hts_SuperDeduper -L human.htstream.stats.new.json -U human.rna.filtered.fastq_SE.fastq
+		
+    "Fragment": {
+        "in": 483041094,
+        "out": 210380860,
+        "basepairs_in": 24152054700,
+        "basepairs_out": 10519043000,
+        "ignored": 63071,
+        "duplicate": 272597163,
+        
+**Not necessarily unexpected to see duplicate reads in RNA-seq data. Did not remove out of concern that this might impact expression analysis.
+
+5. Use HTStream to check for presence of adapter sequences (no adapter sequences present)
+
+bsub -q interactive -n 15 -W 8:00 -R span[hosts=1] -R rusage[mem=12000] hts_AdapterTrimmer -L human.htstream.stats.new.json 
+
+6. Use DUST via PrinSeq for filtering out low comlpexity reads
+
+Sequences with a DUST score above 7 = low complexity
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] perl /share/pkg/prinseq/0.20.4/prinseq-lite.pl  -fastq reads.ALL.human.fastq -lc_method dust -lc_threshold 
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] perl /share/pkg/prinseq/0.20.4/prinseq-lite.pl  -fastq human1.fastq -lc_method dust -lc_threshold 7 
+
+  	Input sequences: 37,534,305
+	  Input bases: 1,876,715,250
+	  Input mean length: 50.00
+	  Good sequences: 37,100,903 (98.85%)
+	  Good bases: 1,855,045,150
+	  Good mean length: 50.00
+	  Bad sequences: 433,402 (1.15%)
+	  Bad bases: 21,670,100
+	  Bad mean length: 50.00
+  	Sequences filtered by specified parameters:
+  	lc_method: 433402
+
+**Overall very few reads eliminated from the sequence files, no matter if catenated sequence file was used or original, single sample sequence files/
+**Does not appear to have had a major effect on BUSCO results.
