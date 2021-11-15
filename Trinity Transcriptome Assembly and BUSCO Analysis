@@ -39,7 +39,7 @@ Human Assembly (filtered) BUSCO results:
   C:41.7%[S:31.7%,D:10.0%],F:9.4%,M:48.9%,n:13780
 **Better, but still not great
 
-6. Ran BUSCO on human sequences using different reference databases (metazoa, vertebrata)
+6. Ran BUSCO on human sequences using different reference databases (metazoa, vertebrata, eukaryota)
 
 Human Assembly BUSCO with metazoa database:
   C:69.7%[S:62.5%,D:7.2%],F:19.2%,M:11.1%,n:954
@@ -48,6 +48,10 @@ Human Assembly BUSCO with metazoa database:
 Human Assembly BUSCO with vertebrata database:
   C:41.6%[S:36.4%,D:5.2%],F:26.0%,M:32.4%,n:3354
 **No improvement here
+
+Human Assembly BUSCO with eukaryota database:
+  C:89.9%[S:24.9%,D:65.0%],F:0.2%,M:9.9%,n:13780
+**Much better score, but this is pretty far back in terms of the lineage - probably only factoring in the most conserved genes and ignoring those that have recently evolved (which is what we are interested in!). 
 
 7. Ran Trinity with contig size threshold of 300bp using DUST filtered files
 
