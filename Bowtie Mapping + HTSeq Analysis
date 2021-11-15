@@ -1,0 +1,235 @@
+Section 3: Bowtie + HTSeq Analysis
+
+Bowtie2 is used to map reads to assembled transcriptomes.
+
+1. Run Bowtie2 on individual human read files:
+
+bowtie2 -p 6 -q -x /Volumes/tempoandmode/PFCEP/bowtie_index/Homo_sapiens.GRCh38 -U /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/human15.fastq -S /Volumes/tempoandmode/PFCEP/CerebellumProject_KR/bam_files/human/Human15.sam
+bowtie2 -p 6 -q -x /Volumes/tempoandmode/PFCEP/bowtie_index/Homo_sapiens.GRCh38 -U /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/human1.fastq -S /Volumes/tempoandmode/PFCEP/CerebellumProject_KR/bam_files/Human3.bam
+
+**Both of these produced great alignment statistics (about 95% of reads mapping to human annotated genome). 
+
+2. Run Bowtie2 on Marmoset catenated read files:
+
+bowtie2 -p 6 -f -x /Volumes/tempoandmode/PFCEP/bowtie_index/Callithrix_jacchus.ASM275486v1 -U /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/Marmoset_Trinity_Files/Trinity.fasta -S /Volumes/tempoandmode/PFCEP/CerebellumProject_KR/bam_files/Marmoset1.bam
+
+**Produced 94% alignment score (great) against annotated genome. 
+
+HTSeq allows us to count reads that map to specific features. In the case of our transcriptome data, we want to map reads to genes, that we have from annotated genome data (gtf files). 
+
+3. Run HTSeq on SAM file from Bowtie2 mapping of entire human catenated read file:
+
+  913,871 total reads
+
+  __no_feature	645953
+  __ambiguous	12019
+  __too_low_aQual	64125
+  __not_aligned	53170
+  __alignment_not_unique	0
+  
+4. Run HTSeq on SAM files from Bowtie2 mapping of individual human sequences 
+
+htseq-count --format=sam --stranded=no --samout=human_counts15.sam /Volumes/tempoandmode/PFCEP/CerebellumProject_KR/bam_files/human/Human15.sam /Volumes/tempoandmode/PFCEP/homo_sapiens/gtf/homo_sapiens/Homo_sapiens.GRCh38.102.gtf 
+
+  #human2.fastq
+  40,130,842 reads
+
+	19,111,678 no feature (47%)
+	1,125,386 ambiguous (3%)
+	6,896,765 low qual (17%)
+	1,695,116 not aligned (4%)
+	
+	11301897 map to features (28%)
+	
+  #human3.fastq
+  25,403,851 reads
+
+	14,128,694 no feature (55%)
+	__ambiguous	479,782
+	__too_low_aQual	3,454,935
+	__not_aligned	956,203
+	__alignment_not_unique	0
+	
+	15% of reads map to features
+
+  #human4.fastq
+  35,446,287 reads
+
+  __no_feature	18,874,599 (53%)
+  __ambiguous	736,224
+  __too_low_aQual	4,812,597
+  __not_aligned	1,460,289
+  __alignment_not_unique	0
+
+  #human5.fastq
+  32,195,239
+
+  __no_feature	17,620,247
+  __ambiguous	649,902
+  __too_low_aQual	4,494,591
+  __not_aligned	1,286,487
+  __alignment_not_unique	0
+
+  #human6.fastq
+  32,501,549 reads
+
+  __no_feature	17,120,242
+  __ambiguous	692893
+  __too_low_aQual	4523993
+  __not_aligned	1320828
+  __alignment_not_unique	0
+
+  #human7.fastq
+  27,141,190 reads
+
+  __no_feature	13,345,248
+  __ambiguous	651477
+  __too_low_aQual	3938866
+  __not_aligned	1189557
+  __alignment_not_unique	0
+
+  #human8.fastq
+  35,111,509 reads
+
+  __no_feature	18,412,355
+  __ambiguous	760840
+  __too_low_aQual	4932220
+  __not_aligned	1447283
+  __alignment_not_unique	0
+
+  #human9.fastq
+  30,677,075 reads
+
+  __no_feature	16,882,251
+  __ambiguous	582149
+  __too_low_aQual	4440205
+  __not_aligned	1336947
+  __alignment_not_unique	0
+
+  #human10.fastq
+  28,855,563 reads
+
+  __no_feature	13,948,654
+  __ambiguous	722100
+  __too_low_aQual	4518932
+  __not_aligned	1308726
+  __alignment_not_unique	0
+
+  #human11.fastq
+  29978356 reads
+
+  __no_feature	14,913,041
+  __ambiguous	726404
+  __too_low_aQual	4822589
+  __not_aligned	1276320
+  __alignment_not_unique	0
+
+  #human12.fastq
+  30974440 reads
+
+  __no_feature	16,537,950
+  __ambiguous	644701
+  __too_low_aQual	4591640
+  __not_aligned	1221656
+  __alignment_not_unique	0
+
+  #human13.fastq
+  30,912,743 reads
+
+  __no_feature	16,768,490
+  __ambiguous	614927
+  __too_low_aQual	4284237
+  __not_aligned	1258452
+  __alignment_not_unique	0
+
+  #human14.fastq
+  31,966,029 reads
+
+  __no_feature	18,135,566
+  __ambiguous	577423
+  __too_low_aQual	4564943
+  __not_aligned	1189629
+  __alignment_not_unique	0
+
+  #human15.fastq
+  34,212,116 reads
+
+  __no_feature	18,733,587
+  __ambiguous	668474
+  __too_low_aQual	4950426
+  __not_aligned	1300958
+  __alignment_not_unique	0
+
+** We surprisingly have many reads (in some cases around half) that are not mapping to any particular features ("genes"). 
+** Looked at these reads that were mapping to no features: put them in a separate file and blasted a random selection of these
+** Found that many appeared to be low complexity-reads that consisted of extremely repetitive regions, and thus did not map to anything
+** Led us to using the DUST feature, but that only filtered out a small fraction of these reads.
+** Not sure if there is a good way to actually take these "no-feature" reads out because this might disrupt the read assembly in trinity/mapping to the reference genome. 
+
+5. Run HTSeq on SAM files from Bowtie2 mapping of individual chimpanzee sequences (all ~95% mapped to reference)
+
+#chimp66
+39,382,281 reads
+
+__no_feature	23,311,438 (60%)
+__ambiguous	83294
+__too_low_aQual	6585396
+__not_aligned	1761726
+__alignment_not_unique	0
+
+#chimp68
+33770584 reads
+
+__no_feature	20,690,402 (61%)
+__ambiguous	66456
+__too_low_aQual	5060409
+__not_aligned	1836274
+__alignment_not_unique	0
+
+#chimp69
+35,647,831 reads
+__no_feature	22,917,165 (64%)
+__ambiguous	64259
+__too_low_aQual	4584170
+__not_aligned	1552251
+__alignment_not_unique	0
+
+#chimp70
+37,050,029 reads
+
+__no_feature	23,551,704 (64%)
+__ambiguous	71283
+__too_low_aQual	4790296
+__not_aligned	1597681
+__alignment_not_unique	0
+
+#chimp71
+31548655 reads
+
+__no_feature	19335613
+__ambiguous	68383
+__too_low_aQual	4303847
+__not_aligned	1318219
+__alignment_not_unique	0
+
+#chimp72
+32999141 reads
+
+__no_feature	21123884
+__ambiguous	57666
+__too_low_aQual	4511678
+__not_aligned	1482948
+__alignment_not_unique	0
+
+#chimp74
+28705160 reads
+
+__no_feature	17485346
+__ambiguous	50644
+__too_low_aQual	4636787
+__not_aligned	1468953
+__alignment_not_unique	0
+
+**Saw similar statistics that was reported for the human HTSeq data
+**Compared these distributions to previously analyzed datasets and found that 50-60% mapping to no feature is pretty normal
+**Not something that we will likely have to worry about in our analysis. 
