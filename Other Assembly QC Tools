@@ -1,1 +1,37 @@
+Section 4: Other Assembly QC Tools (from: https://github.com/trinityrnaseq/trinityrnaseq/wiki/Transcriptome-Assembly-Quality-Assessment)
+
+1. Examine RNA-seq read representation of the assembly with Bowtie2
+
+Expect a majority of reads to map back to the assembly, very few should not map
+
+  #Build a bowtie2 index of the transcriptome
+  bowtie2-build Trinity.fasta Trinity.fasta
+
+  #Perform alignment to capture just the read alignment statistics
+
+  bowtie2 -p 10 -q --no-unal -k 20 -x Trinity.fasta -U /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/human1.fastq \
+       2>align_stats.txt| samtools view -@10 -Sb -o human1_alignedtoassembly.bam 
+     
+  #Visualize statistics
+  cat 2>&1 align_stats.txt
+
+    37534305 reads; of these:
+    37534305 (100.00%) were unpaired; of these:
+    6314867 (16.82%) aligned 0 times
+    23432375 (62.43%) aligned exactly 1 time
+    7787063 (20.75%) aligned >1 times
+  83.18% overall alignment rate (acceptable range is 80% minimum)
+  
+2. Align the assembled transcripts to the reference transcripts and examine the length coverage
+
+bsub -q interactive -Is singularity exec $BLASTIMG makeblastdb -in uniprot_sprot.fasta -dbtype prot
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] singularity exec $BLASTIMG blastx -query HumanTrinity.fasta -db uniprot_sprot.fasta -out blastx.outfmt6.updated -evalue 1e-20 -num_threads 6 -max_target_seqs 1 -outfmt 6
+
+/share/pkg/trinity/2.8.5/util/analyze_blastPlus_topHit_coverage.pl blastx.outfmt6.updated HumanTrinity.fasta uniprot_sprot.fasta
+
+** About 4,586 proteins align to nearly full-length transcripts.
+** This is a pretty reasonable number of proteins that would align here, so this suggests good length coverage of our assembly. 
+
+3. Calculate ExN50
+
 
