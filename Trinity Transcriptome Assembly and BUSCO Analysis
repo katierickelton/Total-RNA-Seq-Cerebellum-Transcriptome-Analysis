@@ -1,0 +1,56 @@
+Section 2: Trinity Transcriptome Assembly and BUSCO completeness analysis
+
+**Used both Trinity version 2.2.0 and 2.8.5 - did not see a major difference in assembly quality. 
+
+1. Run with catenated human fastq files (15 total fastq files combined into 1)
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=150000] -e stderr.txt /share/pkg/trinity/2.2.0/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/reads.ALL.human.fastq --CPU 20
+
+2. Run on single human fastq files (1 at a time)
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] /share/pkg/trinity/2.8.5/Trinity --seqType fq --single human1.fastq  --CPU 20
+
+3. Run BUSCO to assess completeness of assembly (database used = primates_odb10)
+
+bsub -q long -n 20 -W 300:00 -R span[hosts=1] -R rusage[mem=12000] singularity exec $BUSCOIMG busco -i /project/uma_courtney_babbitt/WholeSampleSequences/HumanTrinity.fasta -l primates_odb10 -o BUSCO4_human_output -m tran --offline -f -c 20 --config /project/uma_courtney_babbitt/WholeSampleSequences/myconfig.ini --limit 10 --augustus_species human --augustus_parameters="--genemodel=partial,--singlestrand=true"
+
+Rhesus Macaque Assembly BUSCO results:
+  C:42.0%[S:32.2%,D:9.8%],F:9.4%,M:48.6%,n:13780  
+**Very few complete BUSCOs (ideally should be <80-90%); lots of missing BUSCOs
+
+Human (Catenated) Assembly BUSCO results:
+  C:25.9%[S:22.8%,D:3.1%],F:9.0%,M:65.1%,n:13780
+**Again, lots of missing BUSCOs
+
+4. Checked that BUSCO was functioning properly by downloading reference yeast transcriptome + running against yeast database
+
+singularity exec /share/pkg/busco/4.0.4/busco-4.0.4.sif busco -i /project/uma_courtney_babbitt/WholeSampleSequences/GCF_000146045.2_R64_rna.fna -l saccharomycetes_odb10 -o BUSCO4_yeast_output -m tran --offline -f -c 20 --config /project/uma_courtney_babbitt/WholeSampleSequences/config.yeast.ini --limit 10 --augustus_species saccharomyces_cerevisiae_S288C --augustus_parameters=--genemodel=partial,--singlestrand=true
+
+Yeast Transcriptome BUSCO results:
+  C:99.4%[S:97.2%,D:2.2%],F:0.1%,M:0.5%,n:2137 
+**Clearly BUSCO seems to be functioning properly
+
+5. Ran Trinity + BUSCO on fastq files that have rRNA sequences filtered out
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=17000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.2.0/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human.rna.filtered.fastq_SE.fastq --CPU 20
+bsub -q long -n 20 -W 300:00 -R span[hosts=1] -R rusage[mem=12000] singularity exec $BUSCOIMG busco -i /project/uma_courtney_babbitt/WholeSampleSequences/trinity_out_dir/Trinity.fasta -l primates_odb10 -o BUSCO4_human_filtered_output -m tran --offline -f -c 20 --config /project/uma_courtney_babbitt/WholeSampleSequences/myconfig.ini --limit 10 --augustus_species human --augustus_parameters="--genemodel=partial,--singlestrand=true"
+
+Human Assembly (filtered) BUSCO results:
+  C:41.7%[S:31.7%,D:10.0%],F:9.4%,M:48.9%,n:13780
+**Better, but still not great
+
+6. Ran BUSCO on human sequences using different reference databases (metazoa, vertebrata)
+
+Human Assembly BUSCO with metazoa database:
+  C:69.7%[S:62.5%,D:7.2%],F:19.2%,M:11.1%,n:954
+**Again, this is better but not great
+
+Human Assembly BUSCO with vertebrata database:
+  C:41.6%[S:36.4%,D:5.2%],F:26.0%,M:32.4%,n:3354
+**No improvement here
+
+7. Ran Trinity with contig size threshold of 300bp using DUST filtered files
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.8.5/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human1_prinseq_good_xFka.fastq --CPU 20 --no_bowtie --min_contig_length 300
+**haven't run BUSCO on this yet but don't expect to see major differences here
+
