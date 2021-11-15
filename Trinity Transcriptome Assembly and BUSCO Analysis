@@ -54,3 +54,11 @@ Human Assembly BUSCO with vertebrata database:
 bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.8.5/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human1_prinseq_good_xFka.fastq --CPU 20 --no_bowtie --min_contig_length 300
 **haven't run BUSCO on this yet but don't expect to see major differences here
 
+8. Looked at randomly selected missing BUSCO terms from human catenated file
+
+Most don't appear to be involved in the brain, and those that do seem to have pretty ubiquitous activity throughout (i.e. not cerebellum specific). 
+
+New hypothesis: BUSCO is not an ideal metric for assessment of transcriptome assemblies that come from single tissue-type RNA-seq data. 
+Likely in one tissue, you cannot capture all genes because not all genes will be expressed. This will lead to poor transcriptome assembly statistics. 
+
+It also likely has something to do with our sequencing depth and the fact that we are using single-end, short (50bp) reads. And all of this in combination is giving poor assembly results.
