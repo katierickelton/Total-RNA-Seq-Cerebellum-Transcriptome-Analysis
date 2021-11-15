@@ -53,9 +53,9 @@ Human Assembly BUSCO with eukaryota database:
   C:89.9%[S:24.9%,D:65.0%],F:0.2%,M:9.9%,n:13780
 **Much better score, but this is pretty far back in terms of the lineage - probably only factoring in the most conserved genes and ignoring those that have recently evolved (which is what we are interested in!). 
 
-7. Ran Trinity with contig size threshold of 300bp using DUST filtered files
+7. Ran Trinity using DUST filtered files
 
-bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.8.5/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human1_prinseq_good_xFka.fastq --CPU 20 --no_bowtie --min_contig_length 300
+/share/pkg/trinity/2.2.0/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human1_prinseq_bad_xl8z.fastq --CPU 20
 **haven't run BUSCO on this yet but don't expect to see major differences here
 
 8. Looked at randomly selected missing BUSCO terms from human catenated file
