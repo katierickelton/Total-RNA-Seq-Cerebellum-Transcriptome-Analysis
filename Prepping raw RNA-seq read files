@@ -68,4 +68,4 @@ bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] perl /share/p
   	lc_method: 433402
 
 **Overall very few reads eliminated from the sequence files, no matter if catenated sequence file was used or original, single sample sequence files/
-**Does not appear to have had a major effect on BUSCO results.
+**Does not appear to have had a major effect on BUSCO results (about 40-60% complete, which is still not satisfactory). 
