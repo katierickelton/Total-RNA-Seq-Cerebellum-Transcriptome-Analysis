@@ -34,4 +34,37 @@ bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] singularity e
 
 3. Calculate ExN50
 
+**First, run Trinity on DUST-filtered "good" (i.e. passing) human1.fastq reads 
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.2.0/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human1_prinseq_good_xFka.fastq --CPU 20
+mv /project/uma_courtney_babbitt/WholeSampleSequences/trinity_out_dir/Trinity.fasta /project/uma_courtney_babbitt/WholeSampleSequences/human1_DUST_trinity.fastq
+
+**Next, move Trinity file to Voon and run Bowtie to check mapping of assembly
+
+scp kr82a@ghpcc06.umassrc.org:/project/uma_courtney_babbitt/WholeSampleSequences/human1_DUST_trinity.fastq  /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/human1_DUST_trinity.fastq
+bowtie2 -p 6 -f -x /Volumes/tempoandmode/PFCEP/bowtie_index/Homo_sapiens.GRCh38 -U /Volumes/tempoandmode/htcf.wustl.edu/files/6X3qJmdV/FASTQ_FILES/WholeSampleSequences/human1_DUST_trinity.fastq -S /Volumes/tempoandmode/PFCEP/CerebellumProject_KR/bam_files/human/human1_DUST.sam
+
+**96.89% overall alignment rate
+
+**Just prepare the reference for alignment and abundance estimation (MGHPCC)
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] /share/pkg/trinity/2.8.5/util/align_and_estimate_abundance.pl --transcripts human1_DUST_trinity.fasta --est_method RSEM --aln_method bowtie2 --trinity_mode --prep_reference
+
+**Run the alignment and abundance estimation (assumes reference has already been prepped)
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] /share/pkg/trinity/2.8.5/util/align_and_estimate_abundance.pl --transcripts human1_DUST_trinity.fasta --seqType fq --single human1_prinseq_good_xFka.fastq --est_method RSEM --aln_method bowtie2 --trinity_mode --output_dir rsem_outdir
+
+**Build Transcript and Gene Expression Matrices
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] /share/pkg/trinity/2.8.5/util/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map human1_DUST_trinity.fasta.gene_trans_map --out_prefix rsem --name_sample_by_basedir /project/uma_courtney_babbitt/WholeSampleSequences/rsem_outdir/RSEM.isoforms.results
+
+**Counting Numbers of Expressed Transcripts or Genes
+
+bsub -q long -W 300:00 -n 20 -R rusage[mem=13000] -R span[hosts=1] /share/pkg/trinity/2.8.5/util/misc/count_matrix_features_given_MIN_TPM_threshold.pl rsem.isoform.TPM.not_cross_norm | tee rsem.isoform.TPM.not_cross_norm.counts_by_min_TPM
+
+**Calculate ExN50
+
+/share/pkg/trinity/2.8.5/util/misc/contig_ExN50_statistic.pl rsem.isoform.counts.matrix /project/uma_courtney_babbitt/WholeSampleSequences/human1_DUST_trinity.fasta | tee ExN50_Human1.stats
+
+**Get a really poor ExN50 distribution. I have run this multiple times using different Human1.fastq files (filtered and non-filtered) and the ExN50 distribution is never "ideal" for a good-quality assembly.
 
