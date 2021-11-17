@@ -30,6 +30,10 @@ Yeast Transcriptome BUSCO results:
   C:99.4%[S:97.2%,D:2.2%],F:0.1%,M:0.5%,n:2137 
 **Clearly BUSCO seems to be functioning properly
 
+Human Transcriptome BUSCO results against primate database:
+  C:89.9%[S:24.9%,D:65.0%],F:0.2%,M:9.9%,n:13780
+**Clearly BUSCO seems to be functioning properly
+
 5. Ran Trinity + BUSCO on fastq files that have rRNA sequences filtered out
 
 bsub -q long -W 300:00 -n 20 -R rusage[mem=17000] -R span[hosts=1] -e stderr.txt /share/pkg/trinity/2.2.0/Trinity --seqType fq --max_memory 250G --single /project/uma_courtney_babbitt/WholeSampleSequences/human.rna.filtered.fastq_SE.fastq --CPU 20
@@ -48,10 +52,6 @@ Human Assembly BUSCO with metazoa database:
 Human Assembly BUSCO with vertebrata database:
   C:41.6%[S:36.4%,D:5.2%],F:26.0%,M:32.4%,n:3354
 **No improvement here
-
-Human Assembly BUSCO with eukaryota database:
-  C:89.9%[S:24.9%,D:65.0%],F:0.2%,M:9.9%,n:13780
-**Much better score, but this is pretty far back in terms of the lineage - probably only factoring in the most conserved genes and ignoring those that have recently evolved (which is what we are interested in!). 
 
 7. Ran Trinity using DUST filtered files
 
